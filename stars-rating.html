@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гибкий контрол рейтинга</title>
+    <style>
+        /* Базовые стили и CSS-переменные для скинов */
+        .rating-control {
+            --rating-size: 32px;         /* Размер звезд */
+            --rating-color: lightgrey;    /* Цвет неактивных звезд */
+            --rating-active-color: gold;  /* Цвет активных звезд */
+            --rating-hover-color: gold;   /* Цвет звезд при наведении */
+            --rating-shadow: #bbb;        /* Тень неактивных звезд */
+            --rating-active-shadow: #c60; /* Тень активных звезд */
+            --rating-gap: 4px;            /* Расстояние между звездами */
+
+            display: inline-flex;
+
+        }
+
+        .rating-stars {
+            display: inline-flex;
+            flex-direction: row-reverse; /* Важно для логики "~" */
+            gap: var(--rating-gap);
+        }
+
+        /* Скрываем настоящие input */
+        .rating-stars input {
+            display: none;
+        }
+
+        .rating-stars label {
+            font-size: var(--rating-size);
+            color: var(--rating-color);
+            cursor: pointer;
+            transition: color 0.2s, text-shadow 0.2s;
+            text-shadow: 1px 1px var(--rating-shadow);
+        }
+
+        /* Символ звезды */
+        .rating-stars label::before {
+            content: '★';
+        }
+
+        /* Закрашиваем звезды справа от выбранной */
+        .rating-stars input:checked ~ label {
+            color: var(--rating-active-color);
+            text-shadow: 1px 1px var(--rating-active-shadow);
+        }
+
+        /* Ховер: закрашиваем все звезды слева от текущей */
+        .rating-stars:not(:has(input:checked)) label:hover,
+        .rating-stars:not(:has(input:checked)) label:hover ~ label {
+            color: var(--rating-hover-color);
+        }
+
+        /* Ховер после выбора рейтинга */
+        .rating-stars input:checked + label:hover,
+        .rating-stars input:checked + label:hover ~ label,
+        .rating-stars input:checked ~ label:hover,
+        .rating-stars input:checked ~ label:hover ~ label {
+            color: var(--rating-hover-color);
+            text-shadow: 1px 1px var(--rating-active-shadow);
+        }
+                
+        /* Адаптивность для мобильных устройств */
+        @media (max-width: 480px) {
+        .progress-bar {
+            --width: 100%;
+            --height: 12px;
+            --font-size: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Пример использования -->
+    <div id="rating1"></div>
+
+    <script>
+        class RatingControl {
+            constructor(container, options = {}) {
+                this.container = typeof container === 'string' 
+                    ? document.querySelector(container) 
+                    : container;
+                
+                // Настройки по умолчанию
+                this.options = {
+                    maxRating: 5,
+                    currentRating: 0,
+                    readonly: false,
+                    onRate: null,
+                    ...options
+                };
+
+                this.rating = this.options.currentRating;
+                this.render();
+                this.setupEvents();
+            }
+
+            render() {
+                // Очищаем контейнер
+                this.container.innerHTML = '';
+
+                // Создаем основную структуру
+                const controlElement = document.createElement('div');
+                controlElement.className = 'rating-control';
+                if (this.options.readonly) {
+                    controlElement.classList.add('readonly');
+                }
+
+                // Создаем звезды
+                const starsElement = document.createElement('div');
+                starsElement.className = 'rating-stars';
+
+                for (let i = this.options.maxRating; i >= 1; i--) {
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = `rating-${Math.random().toString(36).substr(2, 9)}`;
+                    input.id = `${this.container.id}-star-${i}`;
+                    input.value = i;
+                    if (i === this.rating) {
+                        input.checked = true;
+                    }
+
+                    const label = document.createElement('label');
+                    label.htmlFor = input.id;
+                    label.title = `Оценка «${i}»`;
+
+                    starsElement.appendChild(input);
+                    starsElement.appendChild(label);
+                }
+
+                controlElement.appendChild(starsElement);
+                this.container.appendChild(controlElement);
+                this.starsElement = starsElement;
+            }
+
+            setupEvents() {
+                if (this.options.readonly) return;
+
+                const inputs = this.starsElement.querySelectorAll('input');
+                
+                inputs.forEach(input => {
+                    input.addEventListener('change', (e) => {
+                        this.rating = parseInt(e.target.value);
+                        this.updateDisplay();
+                        
+                        // Вызываем колбэк, если он есть
+                        if (typeof this.options.onRate === 'function') {
+                            this.options.onRate(this.rating);
+                        }
+                    });
+                });
+            }
+
+            updateDisplay() {
+                // Обновляем отмеченную звезду
+                const inputs = this.starsElement.querySelectorAll('input');
+                inputs.forEach(input => {
+                    input.checked = parseInt(input.value) === this.rating;
+                });
+            }
+
+            setRating(rating) {
+                this.rating = Math.max(0, Math.min(this.options.maxRating, rating));
+                this.updateDisplay();
+            }
+
+            getRating() {
+                return this.rating;
+            }
+
+            setReadonly(readonly) {
+                this.options.readonly = readonly;
+                this.container.querySelector('.rating-control').classList.toggle('readonly', readonly);
+                
+                // Перерисовываем, чтобы обновить состояние
+                this.render();
+                if (!readonly) {
+                    this.setupEvents();
+                }
+            }
+        }
+
+        // Пример использования
+        document.addEventListener('DOMContentLoaded', () => {
+            // Простой контрол
+            const rating1 = new RatingControl('#rating1', {
+                currentRating: 0,
+                onRate: (rating) => console.log('Пользователь поставил оценку:', rating)
+            });
+        });
+    </script>
+</body>
+</html>

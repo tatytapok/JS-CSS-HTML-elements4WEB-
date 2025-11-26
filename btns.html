@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гибкие кнопки</title>
+    <style>
+        /* Базовые стили с CSS-переменными 
+        Задаем с помощью переменных для лучшей 
+        адаптируемости кода под дальнейшие задачи
+        */
+        .btn {
+            --btn-padding: 12px 24px;
+            --btn-font-size: 16px;
+            --btn-border-radius: 8px;
+            --btn-border-width: 2px;
+            --btn-transition: all 0.2s ease;
+            --btn-font-weight: 500;
+            --btn-line-height: 1.2;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--btn-padding);
+            font-size: var(--btn-font-size);
+            font-weight: var(--btn-font-weight);
+            line-height: var(--btn-line-height);
+            border-radius: var(--btn-border-radius);
+            cursor: pointer; /*меняет курсор на "выбор" при наведении на кнопку*/
+            border: var(--btn-border-width) solid transparent;
+            transition: var(--btn-transition);
+            text-decoration: none;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Primary кнопка */
+        .btn.primary {
+            --btn-bg: #007bff;
+            --btn-color: #ffffff;
+            --btn-border-color: #007bff;
+            --btn-hover-bg: #0056b3;
+            --btn-hover-color: #ffffff;
+            --btn-hover-border-color: #0056b3;
+
+            background: var(--btn-bg);
+            color: var(--btn-color);
+            border-color: var(--btn-border-color);
+        }
+
+        .btn.primary:hover {
+            background: var(--btn-hover-bg);
+            color: var(--btn-hover-color);
+            border-color: var(--btn-hover-border-color);
+            transform: translateY(-1px);/*немного поднимает кнопку вверх при наведении на нее*/
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+
+        /* Outline кнопка */
+        .btn.outline {
+            --btn-bg: transparent; /*прозрачный цвет*/
+            --btn-color: #007bff;
+            --btn-border-color: #007bff;
+            --btn-hover-bg: #007bff;
+            --btn-hover-color: #ffffff;
+            --btn-hover-border-color: #007bff;
+
+            background: var(--btn-bg);
+            color: var(--btn-color);
+            border-color: var(--btn-border-color);
+        }
+
+        .btn.outline:hover {
+            background: var(--btn-hover-bg);
+            color: var(--btn-hover-color);
+            border-color: var(--btn-hover-border-color);
+            transform: translateY(-1px);
+        }
+
+        /* Ghost кнопка */
+        .btn.ghost {
+            --btn-bg: transparent;
+            --btn-color: #6c757d;
+            --btn-border-color: transparent;
+            --btn-hover-bg: rgba(108, 117, 125, 0.1);
+            --btn-hover-color: #495057;
+            --btn-hover-border-color: transparent;
+
+            background: var(--btn-bg);
+            color: var(--btn-color);
+            border-color: var(--btn-border-color);
+        }
+
+        .btn.ghost:hover {
+            background: var(--btn-hover-bg);
+            color: var(--btn-hover-color);
+            border-color: var(--btn-hover-border-color);
+        }
+
+        /* Размеры */
+        .btn.small {
+            --btn-padding: 8px 16px;
+            --btn-font-size: 14px;
+        }
+
+        .btn.large {
+            --btn-padding: 16px 32px;
+            --btn-font-size: 18px;
+        }
+
+        /* Состояния */
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important; /*приоритет не изменять кнопку*/
+        }
+
+        .btn.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        /* Альтернативные скины */
+        .btn.success {
+            --btn-bg: #28a745;
+            --btn-border-color: #28a745;
+            --btn-hover-bg: #218838;
+            --btn-hover-border-color: #1e7e34;
+        }
+
+        .btn.danger {
+            --btn-bg: #dc3545;
+            --btn-border-color: #dc3545;
+            --btn-hover-bg: #c82333;
+            --btn-hover-border-color: #bd2130;
+        }
+
+        .btn.warning {
+            --btn-bg: #ffc107;
+            --btn-color: #212529;
+            --btn-border-color: #ffc107;
+            --btn-hover-bg: #e0a800;
+            --btn-hover-color: #212529;
+            --btn-hover-border-color: #d39e00;
+        }
+
+        /* Темная тема адаптация */
+        @media (prefers-color-scheme: dark) {
+            .btn.ghost {
+                --btn-color: #adb5bd;
+                --btn-hover-bg: rgba(173, 181, 189, 0.1);
+                --btn-hover-color: #dee2e6;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Различные представления кнопок -->
+    <div style="display: flex; flex-direction: column; gap: 16px; padding: 20px;">
+        <!-- Основные типы -->
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button class="btn primary">Основная</button>
+            <button class="btn outline">Контурная</button>
+            <button class="btn ghost">Полупрозрачная</button>
+        </div>
+
+        <!-- Разные размеры -->
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <button class="btn primary small">Маленькая</button>
+            <button class="btn primary">Обычная</button>
+            <button class="btn primary large">Большая</button>
+        </div>
+
+        <!-- Разные цвета -->
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button class="btn primary success">Успех</button>
+            <button class="btn primary danger">Ошибка</button>
+            <button class="btn primary warning">Предупреждение</button>
+        </div>
+
+        <!-- Состояния -->
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button class="btn primary" disabled>Отключена</button>
+            <button class="btn outline loading">Загрузка...</button>
+        </div>
+
+        <!-- Как ссылка -->
+        <div>
+            <a href="#" class="btn primary">Кнопка-ссылка</a>
+            <a href="#" class="btn outline">Еще ссылка</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гибкий прогресс-бар</title>
+    <style>
+        .progress-bar {
+            --progress-height: 16px;
+            --progress-border-radius: 8px;
+            --progress-bg-color: #eee;
+            --progress-fill-color: linear-gradient(90deg, #4caf50, #8bc34a);
+            --progress-font-size: 10px;
+            --progress-border: none;
+            --progress-padding: 0;
+            --progress-width: 300px;
+
+            width: var(--progress-width);
+            background: var(--progress-bg-color);
+            border-radius: var(--progress-border-radius);
+            overflow: hidden;
+            position: relative;
+            border: var(--progress-border);
+            padding: var(--progress-padding);
+            align-self: flex-start;
+            margin-right: auto;
+        }
+
+        .progress-bar__fill {
+            height: var(--progress-height);
+            background: var(--progress-fill-color);
+            transition: width 0.3s ease;
+            position: relative;
+            width: 0%;
+            min-width: 0%;
+        }
+
+        .progress-bar__text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--progress-text-color);
+            font-size: var(--progress-font-size);
+            font-weight: bold;
+            text-shadow: 0 0 2px rgba(255, 255, 255, 0.7);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Базовый пример -->
+    <div class="progress-bar" id="progress1">
+        <div class="progress-bar__fill"></div>
+        <div class="progress-bar__text">0%</div>
+    </div>
+
+    <script>
+        class ProgressBar {
+            constructor(container, options = {}) {
+                this.container = typeof container === 'string' 
+                    ? document.querySelector(container) 
+                    : container;
+                
+                this.options = {
+                    value: 0,
+                    max: 100,
+                    ...options
+                };
+
+                this.fillElement = this.container.querySelector('.progress-bar__fill');
+                this.textElement = this.container.querySelector('.progress-bar__text');
+                
+                this.setValue(this.options.value);
+            }
+
+            setValue(value) {
+                this.value = Math.max(0, Math.min(this.options.max, value));
+                const percentage = (this.value / this.options.max) * 100;
+                
+                if (this.fillElement) {
+                    this.fillElement.style.width = percentage + '%';
+                }
+                
+                if (this.textElement) {
+                    this.textElement.textContent = Math.round(percentage) + '%';
+                }
+            }
+
+            getValue() {
+                return this.value;
+            }
+
+            setWidth(width) {
+                this.container.style.setProperty('--progress-width', width);
+            }
+        }
+
+        // Пример использования
+        document.addEventListener('DOMContentLoaded', () => {
+            const progress1 = new ProgressBar('#progress1', { value: 0 });
+
+            // Анимация для демонстрации
+            let width = 0;
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                } else {
+                    width++;
+                    progress1.setValue(width);
+                }
+            }, 30);
+        });
+    </script>
+</body>
+</html>
